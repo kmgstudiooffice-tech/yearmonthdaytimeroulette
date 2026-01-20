@@ -1,1 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>日時連動型 計算ルーレット</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+        h1 { color: #333; font-size: 1.2rem; margin-bottom: 1.5rem; }
+        .display-area {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            min-height: 120px;
+        }
+        #timestamp { font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; }
+        #formula { font-size: 1.1rem; color: #555; font-weight: bold; margin-bottom: 1rem; }
+        #result { 
+            font-size: 3rem; 
+            color: #e74c3c; 
+            font-weight: 900;
+            text-shadow: 2px 2px 0px #fceaea;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.3s;
+        }
+        button:hover { background-color: #2980b9; }
+        button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
 
+<div class="container">
+    <h1>日時連動・四則演算ルーレット</h1>
+    
+    <div class="display-area">
+        <div id="timestamp">ボタンを押すと日時を取得します</div>
+        <div id="formula">---</div>
+        <div id="result">?</div>
+    </div>
+
+    <button onclick="generateNumber()">ルーレットを回す</button>
+</div>
+
+<script>
+    function generateNumber() {
+        const now = new Date();
+        
+        // 1. 日時情報の取得
+        const Y = now.getFullYear();
+        const M = now.getMonth() + 1;
+        const D = now.getDate();
+        const h = now.getHours();
+        const m = now.getMinutes();
+        const s = now.getSeconds();
+        const ms = now.getMilliseconds();
+
+        const timeStr = `${Y}/${M}/${D} ${h}:${m}:${s}`;
+        document.getElementById('timestamp').innerText = "取得日時: " + timeStr;
+
+        // 2. 日時をシードにして数値を抽出（擬似ランダムの元）
+        // 単純なランダムではなく、日時の数値自体を計算に使用
+        const seed = Y + M + D + h + m + s + ms;
+        
+        // 4つの数字を「日時」から生成 (1-50の範囲で適当に抽出)
+        const n1 = (seed % 17) + 5;
+        const n2 = (ms % 13) + 2;
+        const n3 = (s % 9) + 1;
+        const n4 = (m % 11) + 3;
+
+        // 3. 四則演算のパターン（ここでは一例として組み合わせています）
+        // 常に1-35に収めるためのロジック： (n1 * n2 + n3 - n4) % 35 + 1
+        const rawResult = (n1 * n2) + n3 - n4;
+        
+        // 1-35の範囲に強制変換（剰余演算）
+        const finalResult = Math.abs(rawResult % 35) + 1;
+
+        // 4. 計算式の表示（演出用）
+        const formulaStr = `(${n1} × ${n2}) + ${n3} - ${n4}`;
+        document.getElementById('formula').innerText = formulaStr + " = " + rawResult;
+
+        // 5. 結果の表示
+        const resultElement = document.getElementById('result');
+        resultElement.innerText = finalResult;
+        
+        // アニメーション効果
+        resultElement.style.transform = "scale(1.2)";
+        setTimeout(() => {
+            resultElement.style.transform = "scale(1)";
+        }, 100);
+    }
+</script>
+
+</body>
+</html>
